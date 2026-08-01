@@ -1,80 +1,93 @@
-This is the Official repository of **Java Spring Boot: Professional eCommerce Project Masterclass** on Udemy
+# ⚡ E-Shop - Premium Electronics E-Commerce Platform
 
-# The Ultimate Java and Spring Boot Mastery Roadmap
+Welcome to **E-Shop**, a full-stack, enterprise-grade e-commerce web application specifically tailored for high-end electronics. This project features a robust **Spring Boot** backend coupled with a modern, dynamic, and responsive **React** frontend (built using Vite and styled with Tailwind CSS).
 
-Welcome to your one-stop-shop for mastering Java and Spring Boot! This repository offers a comprehensive learning experience with high-quality resources and community support. Dive into over 150+ hours of premium content, with everything you need to excel at Java and Spring Boot development.
+---
 
-## 🎓 Learning Roadmap
+## 🚀 Key Features
 
-Most of the courses below are available in **Udemy For Business**, so if you have subscription - you can get FREE access.
-Here’s a structured path to enhance your skills with detailed courses available:
+*   **🛒 Premium Catalog**: Clean, modern electronics catalog with realistic branding, product descriptions, pricing, and high-quality studio photography.
+*   **🛠️ Admin Dashboard**: Full admin capabilities to manage categories, products (add, edit, delete, upload images), orders, and users.
+*   **📱 Smooth User Experience**: Equipped with **Lenis Smooth Scroll** and seamless page transitions.
+*   **💳 Stripe Payment Integration**: Secure test checkout flow using Stripe integration.
+*   **🔒 Secure Authentication**: Robust security model powered by **Spring Security** and **JWT (JSON Web Tokens)** for session management.
+*   **📦 Cart & Order Management**: Comprehensive state-managed shopping cart, user order history, and order placement flows.
 
-1. **[Spring Boot By Building Complex Projects Step by Step](https://link.embarkx.com/spring-boot) (90+ Hours of Content)**
-2. **[Master Spring Boot Microservices by Building eCommerce Project](https://link.embarkx.com/microservices) (55+ Hours of Content)**
-3. **[Full Stack AI DevOps for Software Developers (AWS, Azure, GCP)](https://link.embarkx.com/devops) (20+ Hours of Content)**
-4. **[Learn Java with 60+ Hours of Content](http://link.embarkx.com/java) (60+ Hours of Content)**
-5. **[Master Spring Security with React JS + OAuth2](https://link.embarkx.com/spring-security) (34+ Hours of Content)**
-6. **[Master IntelliJ IDEA](http://link.embarkx.com/intellij) (3+ Hours of Content)**
+---
 
+## 🛠️ Technology Stack
 
-## 🌟 With All Our Courses You Gain Access To
+### Backend
+*   **Framework**: Spring Boot (Java 21)
+*   **Security**: Spring Security + JWT Authentication
+*   **Database**: H2 (In-memory for development/testing) / JPA / Hibernate
+*   **Build Tool**: Maven
 
-- 📝 **Notes:** Detailed and downloadable notes to accompany each lesson.
-- 💻 **Source Code:** Full access to the source code used in the tutorials.
-- 🤔 **Doubt Solving:** Responsive instructor and community support.
-- 🎥 **High-Quality HD Videos:** Easy to understand, high-definition video tutorials.
-- 🔄 **Free Lifetime Updates:** Continuous updates to course content at no extra cost.
+### Frontend
+*   **Core**: React (Vite)
+*   **Styling**: Tailwind CSS + Material UI icons
+*   **State Management**: Redux Toolkit (Redux-Thunk)
+*   **Scroll Engine**: Lenis Smooth Scroll
+*   **HTTP Client**: Axios
 
-## 📚 Why Choose This Mastery Series?
+---
 
-With this series, you're not just learning; you're preparing to dominate the field of Java and Spring Boot development. Our structured learning path ensures that you build your skills progressively, with each course designed to build on the knowledge gained from the previous one.
+## 📂 Project Structure
 
-### Join Us Now!
+```
+E-Shop/
+├── sb-ecom/           # Spring Boot Backend Project
+│   ├── src/           # Java Source Code & Resources
+│   └── pom.xml        # Maven Dependency Config
+│
+└── ecom-frontend/     # React Vite Frontend Project
+    ├── src/           # Components, Redux Store, Styles
+    ├── package.json   # NPM Package Dependencies
+    └── vite.config.js # Vite Configuration
+```
 
-Start your journey today to become a master at Java and Spring Boot. Our community and expert instructors are here to support your learning every step of the way. **Enroll and start building your future, today!**
+---
 
+## ⚙️ Getting Started
 
+### Prerequisites
+*   **Java**: JDK 21 or higher
+*   **Node.js**: v18 or higher
+*   **Maven**: Installed or using `mvnw` wrapper
 
+### Running the Backend (`sb-ecom`)
+1.  Configure environment variables (if any) or edit `application.properties`.
+2.  Set your Stripe Secret Key:
+    ```bash
+    $env:STRIPE_SECRET_KEY="your_stripe_secret_key"
+    ```
+3.  Run the application:
+    ```bash
+    ./mvnw.cmd spring-boot:run
+    ```
+4.  The server will start on `http://localhost:8080`.
 
+### Running the Frontend (`ecom-frontend`)
+1.  Navigate to the directory:
+    ```bash
+    cd ecom-frontend
+    ```
+2.  Install packages:
+    ```bash
+    npm install
+    ```
+3.  Run in development mode:
+    ```bash
+    npm run dev
+    ```
+4.  Access the web application at `http://localhost:5173`.
 
-# Usage Policy for Course Materials
+---
 
-## Instructor Information
+## 📧 Contact Information
 
-**Instructor:** Faisal Memon  
-**Company:** [EmbarkX.com](http://www.embarkx.com)
+For inquiries, support, or feedback, feel free to reach out:
 
-## Policy Overview
-
-This document outlines the guidelines and restrictions concerning the use of course materials provided by EmbarkX, including but not limited to PDF presentations, code samples, and video tutorials.
-
-### 1. Personal Use Only
-
-The materials provided in this course are intended for **your personal use only**. They are to be used solely for the purpose of learning and completing this course.
-
-### 2. No Unauthorized Sharing or Distribution
-
-You are **not permitted** to share, distribute, or publicly post any course materials on any websites, social media platforms, or other public forums without prior written consent from the instructor.
-
-### 3. Intellectual Property
-
-All course materials are protected by copyright laws and are the intellectual property of Faisal Memon and EmbarkX. Unauthorized use, reproduction, or distribution of these materials is **strictly prohibited**.
-
-### 4. Reporting Violations
-
-If you become aware of any unauthorized sharing or distribution of course materials, please report it immediately to [embarkxofficial@gmail.com](mailto:embarkxofficial@gmail.com).
-
-### 5. Legal Action
-
-We reserve the right to take legal action against individuals or entities found to be violating this usage policy.
-
-## Thank You
-
-Thank you for respecting these guidelines and helping us maintain the integrity of our course materials.
-
-## Contact Information
-
-- **Email:** [embarkxofficial@gmail.com](mailto:embarkxofficial@gmail.com)
-- **Website:** [www.embarkx.com](http://www.embarkx.com)
-
-
+*   **Developer**: Mihir Singh
+*   **Email**: [mihir304singh@gmail.com](mailto:mihir304singh@gmail.com)
+*   **Location**: Mumbai, India
