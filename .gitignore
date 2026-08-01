@@ -1,0 +1,7 @@
+.idea/
+*.log
+*.jpg
+*.pdf
+PROJECT_MEMORY.md
+/scratch/
+.gemini/
