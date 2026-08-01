@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.toList());
 
         UserInfoResponse response = new UserInfoResponse(userDetails.getId(),
-                userDetails.getUsername(), roles);
+                userDetails.getUsername(), roles, userDetails.getEmail(), null);
 
         return response;
     }

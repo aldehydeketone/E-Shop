@@ -139,6 +139,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderResponse getOrdersForUser(String emailId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Order> pageOrders = orderRepository.findByEmail(emailId, pageDetails);
+
+        List<OrderDTO> orderDTOs = pageOrders.getContent().stream()
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .collect(Collectors.toList());
+
+        return new OrderResponse(
+                orderDTOs,
+                pageOrders.getNumber(),
+                pageOrders.getSize(),
+                pageOrders.getTotalElements(),
+                pageOrders.getTotalPages(),
+                pageOrders.isLast()
+        );
+    }
+
+    @Override
     public OrderDTO updateOrder(Long orderId, String status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order","orderId",orderId));
