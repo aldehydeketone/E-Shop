@@ -1,7 +1,13 @@
 import axios from "axios";
 
+const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+
+if (!apiUrl) {
+    console.error("VITE_API_URL is not configured. API requests will be unavailable.");
+}
+
 const api = axios.create({
-    baseURL: `${import.meta.env.VITE_BACK_END_URL}/api`,
+    baseURL: apiUrl ? `${apiUrl}/api` : "/api",
     withCredentials: true,
 });
 

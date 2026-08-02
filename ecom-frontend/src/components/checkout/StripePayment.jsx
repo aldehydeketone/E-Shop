@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import PaymentForm from './PaymentForm';
 import { createStripePaymentSecret } from '../../store/actions';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 const StripePayment = () => {
   const dispatch = useDispatch();
@@ -16,7 +17,7 @@ const StripePayment = () => {
   const { user, selectedUserCheckoutAddress } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!clientSecret) {
+    if (stripePromise && !clientSecret) {
     const sendData = {
       amount: Number(totalPrice) * 100,
       currency: "usd",
@@ -36,6 +37,17 @@ const StripePayment = () => {
     return (
       <div className='max-w-lg mx-auto'>
         <Skeleton />
+      </div>
+    )
+  }
+
+  if (!stripePromise) {
+    return (
+      <div className='max-w-lg mx-auto'>
+        <Alert severity="warning" variant="filled">
+          <AlertTitle>Stripe is not configured</AlertTitle>
+          Set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in Netlify to enable card payments.
+        </Alert>
       </div>
     )
   }
