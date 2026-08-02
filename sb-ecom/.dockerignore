@@ -1,0 +1,8 @@
+target/
+data/
+images/
+.git/
+.idea/
+*.log
+*.mv.db
+*.trace.db
