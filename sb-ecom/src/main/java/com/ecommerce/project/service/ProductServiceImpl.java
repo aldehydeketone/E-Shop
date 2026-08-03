@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
                 ((product.getDiscount() * 0.01) * product.getPrice());
         product.setSpecialPrice(specialPrice);
         Product savedProduct = productRepository.save(product);
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        return toProductDTO(savedProduct);
     }
 
     @Override
@@ -306,7 +306,20 @@ public class ProductServiceImpl implements ProductService {
         productFromDb.setImage(fileName);
 
         Product updatedProduct = productRepository.save(productFromDb);
-        return modelMapper.map(updatedProduct, ProductDTO.class);
+        return toProductDTO(updatedProduct);
+    }
+
+    private ProductDTO toProductDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setProductId(product.getProductId());
+        productDTO.setProductName(product.getProductName());
+        productDTO.setImage(constructImageUrl(product.getImage()));
+        productDTO.setDescription(product.getDescription());
+        productDTO.setQuantity(product.getQuantity());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setDiscount(product.getDiscount());
+        productDTO.setSpecialPrice(product.getSpecialPrice());
+        return productDTO;
     }
 
 
