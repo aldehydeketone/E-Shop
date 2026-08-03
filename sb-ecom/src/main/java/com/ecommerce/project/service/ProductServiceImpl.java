@@ -23,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     @Autowired
     private CartRepository cartRepository;
 
@@ -59,28 +62,38 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Category", "categoryId", categoryId));
-
-        boolean exists = productRepository.existsByCategoryAndProductName(
-                category,
-                productDTO.getProductName()
-        );
-
-        if (exists) {
-            throw new APIException("Product already exist!!");
+        try {
+            log.info("ADD_PRODUCT STEP 1 - Method entered");
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Category", "categoryId", categoryId));
+            log.info("ADD_PRODUCT STEP 2 - Category loaded");
+            boolean exists = productRepository.existsByCategoryAndProductName(category, productDTO.getProductName());
+            log.info("ADD_PRODUCT STEP 3 - Duplicate check complete");
+            if (exists) {
+                throw new APIException("Product already exist!!");
+            }
+            Product product = modelMapper.map(productDTO, Product.class);
+            log.info("ADD_PRODUCT STEP 4 - DTO mapped");
+            product.setImage("default.png");
+            log.info("ADD_PRODUCT STEP 5 - Image assigned");
+            product.setCategory(category);
+            log.info("ADD_PRODUCT STEP 6 - Category assigned");
+            product.setUser(authUtil.loggedInUser());
+            log.info("ADD_PRODUCT STEP 7 - User assigned");
+            double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
+            product.setSpecialPrice(specialPrice);
+            log.info("ADD_PRODUCT STEP 8 - Special price calculated");
+            Product savedProduct = productRepository.save(product);
+            log.info("ADD_PRODUCT STEP 9 - Product saved");
+            ProductDTO response = toProductDTO(savedProduct);
+            log.info("ADD_PRODUCT STEP 10 - DTO created");
+            log.info("ADD_PRODUCT STEP 11 - Returning response");
+            return response;
+        } catch (Exception e) {
+            log.error("ADD_PRODUCT FAILED", e);
+            throw e;
         }
-
-        Product product = modelMapper.map(productDTO, Product.class);
-        product.setImage("default.png");
-        product.setCategory(category);
-        product.setUser(authUtil.loggedInUser());
-        double specialPrice = product.getPrice() -
-                ((product.getDiscount() * 0.01) * product.getPrice());
-        product.setSpecialPrice(specialPrice);
-        Product savedProduct = productRepository.save(product);
-        return toProductDTO(savedProduct);
     }
 
     @Override
