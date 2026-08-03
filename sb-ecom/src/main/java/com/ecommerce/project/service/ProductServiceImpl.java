@@ -81,8 +81,13 @@ public class ProductServiceImpl implements ProductService {
             double specialPrice = product.getPrice() -
                     ((product.getDiscount() * 0.01) * product.getPrice());
             product.setSpecialPrice(specialPrice);
-            Product savedProduct = productRepository.save(product);
-            return modelMapper.map(savedProduct, ProductDTO.class);
+            try {
+                Product savedProduct = productRepository.save(product);
+                return modelMapper.map(savedProduct, ProductDTO.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
         } else {
             throw new APIException("Product already exist!!");
         }
