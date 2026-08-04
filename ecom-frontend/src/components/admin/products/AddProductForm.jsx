@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import InputField from '../../shared/InputField';
 import { Button } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { addNewProductFromDashboard, fetchCategories, updateProductFromDashboard } from '../../../store/actions';
+import { dashboardProductsAction, fetchCategories, updateProductFromDashboard } from '../../../store/actions';
 import toast from 'react-hot-toast';
 import Spinners from '../../shared/Spinners';
 import SelectTextField from '../../shared/SelectTextField';
 import Skeleton from '../../shared/Skeleton';
 import ErrorPage from '../../shared/ErrorPage';
+import { FaCloudUploadAlt } from 'react-icons/fa';
+import api from '../../../api/api';
 
 const AddProductForm = ({ setOpen, product, update=false}) => {
 const [loader, setLoader] = useState(false);
@@ -17,6 +19,11 @@ const { categories } = useSelector((state) => state.products);
 const { categoryLoader, errorMessage } = useSelector((state) => state.errors);
 const { user } = useSelector((state) => state.auth);
 const isAdmin = user && user?.roles?.includes("ROLE_ADMIN");
+
+// Image state (only for new product creation)
+const [selectedFile, setSelectedFile] = useState(null);
+const [previewImage, setPreviewImage] = useState(null);
+const fileInputRef = useRef();
 
 const dispatch = useDispatch();
     const {
@@ -29,21 +36,65 @@ const dispatch = useDispatch();
         mode: "onTouched"
     });
 
-    const saveProductHandler = (data) => {
-        if(!update) {
-            // create new product logic — coerce numeric strings to numbers for backend
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file && ["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+            const reader = new FileReader();
+            reader.onloadend = () => setPreviewImage(reader.result);
+            reader.readAsDataURL(file);
+            setSelectedFile(file);
+        } else if (file) {
+            toast.error("Please select a valid image file (.jpeg, .jpg, .png)");
+            setSelectedFile(null);
+            setPreviewImage(null);
+        }
+    };
+
+    const saveProductHandler = async (data) => {
+        if (!update) {
+            // ── CREATE ──────────────────────────────────────────────────────────
             const sendData = {
                 ...data,
                 price: parseFloat(data.price) || 0,
                 quantity: parseInt(data.quantity, 10) || 0,
                 discount: parseFloat(data.discount) || 0,
                 specialPrice: parseFloat(data.specialPrice) || 0,
-                categoryId: selectedCategory.categoryId,
+                categoryId: selectedCategory?.categoryId,
             };
-            dispatch(addNewProductFromDashboard(
-                sendData, toast, reset, setLoader, setOpen, isAdmin
-            ));
+
+            try {
+                setLoader(true);
+                const endpoint = isAdmin ? "/admin/categories/" : "/seller/categories/";
+                const { data: created } = await api.post(
+                    `${endpoint}${sendData.categoryId}/product`,
+                    sendData
+                );
+
+                // Upload image immediately after product is created
+                if (selectedFile && created?.productId) {
+                    const formData = new FormData();
+                    formData.append("image", selectedFile);
+                    const imgEndpoint = isAdmin ? "/admin/products/" : "/seller/products/";
+                    try {
+                        await api.put(`${imgEndpoint}${created.productId}/image`, formData);
+                    } catch (imgErr) {
+                        // Non-fatal: product exists, image just didn't upload
+                        toast.error("Product created but image upload failed. You can upload it from the product list.");
+                    }
+                }
+
+                toast.success("Product created successfully");
+                reset();
+                setOpen(false);
+                await dispatch(dashboardProductsAction());
+            } catch (error) {
+                console.error(error);
+                toast.error(error?.response?.data?.message || "Product creation failed");
+            } finally {
+                setLoader(false);
+            }
         } else {
+            // ── UPDATE ──────────────────────────────────────────────────────────
             const sendData = {
                 ...data,
                 price: parseFloat(data.price) || 0,
@@ -178,6 +229,46 @@ const dispatch = useDispatch();
                     </p>
                 )}
         </div>
+
+        {/* ── Image picker (only when creating a new product) ── */}
+        {!update && (
+            <div className="flex flex-col gap-2 w-full">
+                <label className="font-semibold text-sm text-slate-800">
+                    Product Image <span className="text-slate-500 font-normal">(optional)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-custom-blue border border-dashed border-custom-blue rounded-md p-3 w-full justify-center">
+                    <FaCloudUploadAlt size={20} />
+                    <span>{selectedFile ? selectedFile.name : "Upload Product Image"}</span>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                        accept=".jpeg,.jpg,.png"
+                    />
+                </label>
+                {previewImage && (
+                    <div>
+                        <img
+                            src={previewImage}
+                            alt="Image Preview"
+                            className="h-32 rounded-md mb-1 object-cover"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPreviewImage(null);
+                                setSelectedFile(null);
+                                if (fileInputRef.current) fileInputRef.current.value = null;
+                            }}
+                            className="bg-rose-600 text-white text-xs px-2 py-1 rounded-md"
+                        >
+                            Clear Image
+                        </button>
+                    </div>
+                )}
+            </div>
+        )}
 
         <div className='flex w-full justify-between items-center absolute bottom-14'>
             <Button disabled={loader}
