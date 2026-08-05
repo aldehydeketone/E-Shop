@@ -315,4 +315,16 @@ public class CartServiceImpl implements CartService{
         return "Cart created/updated with the new items successfully";
     }
 
+    private ProductDTO toProductDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setProductId(product.getProductId());
+        productDTO.setProductName(product.getProductName());
+        productDTO.setImage(product.getImage());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setQuantity(product.getQuantity());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setDiscount(product.getDiscount());
+        productDTO.setSpecialPrice(product.getSpecialPrice());
+        return productDTO;
+    }
 }
