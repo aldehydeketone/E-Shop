@@ -77,7 +77,9 @@ public class CartServiceImpl implements CartService{
 
         cartRepository.save(cart);
 
-        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+        CartDTO cartDTO = new CartDTO();
+        cartDTO.setCartId(cart.getCartId());
+        cartDTO.setTotalPrice(cart.getTotalPrice());
 
         List<CartItem> cartItems = cart.getCartItems();
 
@@ -101,7 +103,9 @@ public class CartServiceImpl implements CartService{
         }
 
         List<CartDTO> cartDTOs = carts.stream().map(cart -> {
-            CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+            CartDTO cartDTO = new CartDTO();
+            cartDTO.setCartId(cart.getCartId());
+            cartDTO.setTotalPrice(cart.getTotalPrice());
 
             List<ProductDTO> products = cart.getCartItems().stream().map(cartItem -> {
                 ProductDTO productDTO = toProductDTO(cartItem.getProduct());
@@ -126,7 +130,9 @@ public class CartServiceImpl implements CartService{
         if (cart == null){
             throw new ResourceNotFoundException("Cart", "cartId", cartId);
         }
-        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+        CartDTO cartDTO = new CartDTO();
+        cartDTO.setCartId(cart.getCartId());
+        cartDTO.setTotalPrice(cart.getTotalPrice());
         cart.getCartItems().forEach(c ->
                 c.getProduct().setQuantity(c.getQuantity()));
         List<ProductDTO> products = cart.getCartItems().stream()
@@ -188,7 +194,9 @@ public class CartServiceImpl implements CartService{
         }
 
 
-        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+        CartDTO cartDTO = new CartDTO();
+        cartDTO.setCartId(cart.getCartId());
+        cartDTO.setTotalPrice(cart.getTotalPrice());
 
         List<CartItem> cartItems = cart.getCartItems();
 
