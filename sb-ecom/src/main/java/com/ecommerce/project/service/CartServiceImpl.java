@@ -149,23 +149,22 @@ public class CartServiceImpl implements CartService{
     @Transactional
     @Override
     public CartDTO updateProductQuantityInCart(Long productId, Integer quantity) {
-        log.info("UPDATE_CART STEP 1 - Enter updateProductQuantityInCart with productId={}, quantity={}", productId, quantity);
         try {
-            log.info("UPDATE_CART STEP 2 - Before createCart()");
-            Cart userCart = createCart();
-            log.info("UPDATE_CART STEP 3 - After createCart(), userCartId={}", userCart != null ? userCart.getCartId() : null);
+            String emailId = authUtil.loggedInEmail();
+            Cart userCart = cartRepository.findCartByEmail(emailId);
+            if (userCart == null) {
+                userCart = new Cart();
+                userCart.setTotalPrice(0.00);
+                userCart.setUser(authUtil.loggedInUser());
+                userCart = cartRepository.save(userCart);
+            }
+            Long cartId  = userCart.getCartId();
 
-            Long cartId = userCart.getCartId();
-
-            log.info("UPDATE_CART STEP 4 - Before cartRepository.findById(cartId={})", cartId);
             Cart cart = cartRepository.findById(cartId)
                     .orElseThrow(() -> new ResourceNotFoundException("Cart", "cartId", cartId));
-            log.info("UPDATE_CART STEP 5 - After find cart: cartId={}", cart.getCartId());
 
-            log.info("UPDATE_CART STEP 6 - Before productRepository.findById(productId={})", productId);
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
-            log.info("UPDATE_CART STEP 7 - After find product: productId={}, name={}", product.getProductId(), product.getProductName());
 
             if (product.getQuantity() == 0) {
                 throw new APIException(product.getProductName() + " is not available");
@@ -176,65 +175,50 @@ public class CartServiceImpl implements CartService{
                         + " less than or equal to the quantity " + product.getQuantity() + ".");
             }
 
-            log.info("UPDATE_CART STEP 8 - Before findCartItemByProductIdAndCartId(cartId={}, productId={})", cartId, productId);
             CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-            log.info("UPDATE_CART STEP 9 - After find cartItem: cartItem={}", cartItem != null ? cartItem.getCartItemId() : "null");
 
             if (cartItem == null) {
                 throw new APIException("Product " + product.getProductName() + " not available in the cart!!!");
             }
 
-            log.info("UPDATE_CART STEP 10 - Before calculate newQuantity (current item qty={}, requested qty={})", cartItem.getQuantity(), quantity);
+            // Calculate new quantity
             int newQuantity = cartItem.getQuantity() + quantity;
-            log.info("UPDATE_CART STEP 11 - After calculate newQuantity={}", newQuantity);
 
+            // Validation to prevent negative quantities
             if (newQuantity < 0) {
                 throw new APIException("The resulting quantity cannot be negative.");
             }
 
-            if (newQuantity == 0) {
-                log.info("UPDATE_CART STEP 12 - Before deleteProductFromCart(cartId={}, productId={})", cartId, productId);
+            if (newQuantity == 0){
                 deleteProductFromCart(cartId, productId);
-                log.info("UPDATE_CART STEP 13 - After deleteProductFromCart()");
             } else {
                 cartItem.setProductPrice(product.getSpecialPrice());
                 cartItem.setQuantity(cartItem.getQuantity() + quantity);
                 cartItem.setDiscount(product.getDiscount());
                 cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice() * quantity));
-
-                log.info("UPDATE_CART STEP 14 - Before cartRepository.save(cart)");
                 cartRepository.save(cart);
-                log.info("UPDATE_CART STEP 15 - After cartRepository.save(cart)");
             }
 
-            log.info("UPDATE_CART STEP 16 - Before cartItemRepository.save(cartItem)");
             CartItem updatedItem = cartItemRepository.save(cartItem);
-            log.info("UPDATE_CART STEP 17 - After cartItemRepository.save(cartItem), updatedItem qty={}", updatedItem != null ? updatedItem.getQuantity() : "null");
-
-            if (updatedItem != null && updatedItem.getQuantity() == 0) {
-                log.info("UPDATE_CART STEP 18 - Before cartItemRepository.deleteById(cartItemId={})", updatedItem.getCartItemId());
+            if(updatedItem.getQuantity() == 0){
                 cartItemRepository.deleteById(updatedItem.getCartItemId());
-                log.info("UPDATE_CART STEP 19 - After cartItemRepository.deleteById()");
             }
 
-            log.info("UPDATE_CART STEP 20 - Before building CartDTO");
+
             CartDTO cartDTO = new CartDTO();
             cartDTO.setCartId(cart.getCartId());
             cartDTO.setTotalPrice(cart.getTotalPrice());
 
-            log.info("UPDATE_CART STEP 21 - Before cart.getCartItems()");
             List<CartItem> cartItems = cart.getCartItems();
-            log.info("UPDATE_CART STEP 22 - After cart.getCartItems(), count={}", cartItems != null ? cartItems.size() : "null");
 
-            log.info("UPDATE_CART STEP 23 - Before mapping productStream");
             Stream<ProductDTO> productStream = cartItems.stream().map(item -> {
                 ProductDTO prd = toProductDTO(item.getProduct());
                 prd.setQuantity(item.getQuantity());
                 return prd;
             });
 
+
             cartDTO.setProducts(productStream.toList());
-            log.info("UPDATE_CART STEP 24 - After building CartDTO, before return");
 
             return cartDTO;
         } catch (Exception e) {
