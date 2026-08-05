@@ -119,11 +119,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = pageProducts.getContent();
 
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> {
-                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-                    productDTO.setImage(constructImageUrl(product.getImage()));
-                    return productDTO;
-                })
+                .map(this::toProductDTO)
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
@@ -149,11 +145,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = pageProducts.getContent();
 
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> {
-                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-                    productDTO.setImage(constructImageUrl(product.getImage()));
-                    return productDTO;
-                })
+                .map(this::toProductDTO)
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
@@ -180,11 +172,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = pageProducts.getContent();
 
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> {
-                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-                    productDTO.setImage(constructImageUrl(product.getImage()));
-                    return productDTO;
-                })
+                .map(this::toProductDTO)
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
@@ -221,7 +209,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .map(this::toProductDTO)
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
@@ -245,7 +233,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<Product> products = pageProducts.getContent();
         List<ProductDTO> productDTOS = products.stream()
-                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .map(this::toProductDTO)
                 .toList();
 
         if(products.isEmpty()){
@@ -284,7 +272,7 @@ public class ProductServiceImpl implements ProductService {
             CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
             List<ProductDTO> products = cart.getCartItems().stream()
-                    .map(p -> modelMapper.map(p.getProduct(), ProductDTO.class)).collect(Collectors.toList());
+                    .map(p -> toProductDTO(p.getProduct())).collect(Collectors.toList());
 
             cartDTO.setProducts(products);
 
@@ -294,7 +282,7 @@ public class ProductServiceImpl implements ProductService {
 
         cartDTOs.forEach(cart -> cartService.updateProductInCarts(cart.getCartId(), productId));
 
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        return toProductDTO(savedProduct);
     }
 
     @Override
@@ -307,7 +295,7 @@ public class ProductServiceImpl implements ProductService {
         carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
 
         productRepository.delete(product);
-        return modelMapper.map(product, ProductDTO.class);
+        return toProductDTO(product);
     }
 
     @Override
