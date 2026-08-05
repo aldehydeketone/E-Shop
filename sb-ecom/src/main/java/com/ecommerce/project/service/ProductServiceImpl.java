@@ -253,6 +253,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private String constructImageUrl(String imageName) {
+        if (imageName == null) {
+            return "";
+        }
+        if (imageName.startsWith("http://") || imageName.startsWith("https://")) {
+            return imageName;
+        }
         return imageBaseUrl.endsWith("/") ? imageBaseUrl + imageName : imageBaseUrl + "/" + imageName;
     }
 
@@ -359,6 +365,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
+        if (product.getImage() != null && product.getImage().contains("cloudinary.com")) {
+            try {
+                fileService.deleteImage(product.getImage());
+            } catch (IOException e) {
+                log.error("Failed to delete image from Cloudinary for product id: {}", productId, e);
+            }
+        }
+
         // DELETE
         List<Cart> carts = cartRepository.findCartsByProductId(productId);
         carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
@@ -373,8 +387,12 @@ public class ProductServiceImpl implements ProductService {
         Product productFromDb = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
-        String fileName = fileService.uploadImage(path, image);
-        productFromDb.setImage(fileName);
+        if (productFromDb.getImage() != null && productFromDb.getImage().contains("cloudinary.com")) {
+            fileService.deleteImage(productFromDb.getImage());
+        }
+
+        String secureUrl = fileService.uploadImage(path, image);
+        productFromDb.setImage(secureUrl);
 
         Product updatedProduct = productRepository.save(productFromDb);
         return toProductDTO(updatedProduct);

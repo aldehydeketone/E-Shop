@@ -1,55 +1,81 @@
 package com.ecommerce.project.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.Map;
 
 @Service
 public class FileServiceImpl implements FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
 
+    @Autowired
+    private Cloudinary cloudinary;
+
     @Override
-    public String uploadImage(String path, MultipartFile file) throws IOException {
-        String originalFileName = file.getOriginalFilename();
-        if (originalFileName == null || !originalFileName.contains(".")) {
-            throw new IOException("Uploaded image must have a file extension");
+    public String uploadImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IOException("Cannot upload an empty file");
         }
 
-        // === DIAGNOSTIC LOGGING (RENDER EVIDENCE) ===
-        Path directory = Paths.get(path);
-        File dirFile = directory.toAbsolutePath().toFile();
-        log.info("[DIAG] project.image raw value            : {}", path);
-        log.info("[DIAG] Absolute directory path            : {}", dirFile.getAbsolutePath());
-        log.info("[DIAG] Directory exists before mkdirs     : {}", dirFile.exists());
-        log.info("[DIAG] JVM working directory (user.dir)   : {}", System.getProperty("user.dir"));
+        log.info("[CLOUDINARY] Uploading file '{}' (size: {} bytes) to Cloudinary...",
+                file.getOriginalFilename(), file.getSize());
 
-        Files.createDirectories(directory);
-        boolean existsAfter = dirFile.exists();
-        boolean canWrite    = dirFile.canWrite();
-        log.info("[DIAG] Directory exists after mkdirs      : {}", existsAfter);
-        log.info("[DIAG] Directory canWrite                 : {}", canWrite);
-        // ============================================
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String secureUrl = (String) uploadResult.get("secure_url");
 
-        String randomId = UUID.randomUUID().toString();
-        String fileName = randomId.concat(originalFileName.substring(originalFileName.lastIndexOf('.')));
-        Path destPath = directory.resolve(fileName);
+        log.info("[CLOUDINARY] Successfully uploaded. Secure URL: {}", secureUrl);
+        return secureUrl;
+    }
 
-        log.info("[DIAG] Destination file path              : {}", destPath.toAbsolutePath());
+    @Override
+    public String uploadImage(String path, MultipartFile file) throws IOException {
+        return uploadImage(file);
+    }
 
-        Files.copy(file.getInputStream(), destPath);
+    @Override
+    public boolean deleteImage(String imageUrl) throws IOException {
+        if (imageUrl == null || !imageUrl.contains("cloudinary.com")) {
+            log.info("[CLOUDINARY] Skipping delete: URL '{}' is null or not a Cloudinary asset", imageUrl);
+            return false;
+        }
 
-        boolean savedExists = destPath.toFile().exists();
-        log.info("[DIAG] Destination file exists after copy : {}", savedExists);
+        try {
+            String publicId = extractPublicId(imageUrl);
+            log.info("[CLOUDINARY] Deleting asset with publicId: '{}' (from URL: '{}')", publicId, imageUrl);
 
-        return fileName;
+            Map deleteResult = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            String result = (String) deleteResult.get("result");
+            log.info("[CLOUDINARY] Delete result for publicId '{}': {}", publicId, result);
+            return "ok".equalsIgnoreCase(result);
+        } catch (Exception e) {
+            log.error("[CLOUDINARY] Failed to delete image from Cloudinary: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private String extractPublicId(String imageUrl) {
+        int uploadIndex = imageUrl.indexOf("/upload/");
+        if (uploadIndex == -1) {
+            return "";
+        }
+        String pathAfterUpload = imageUrl.substring(uploadIndex + "/upload/".length());
+
+        if (pathAfterUpload.matches("^v\\d+/.*")) {
+            pathAfterUpload = pathAfterUpload.substring(pathAfterUpload.indexOf('/') + 1);
+        }
+
+        int lastDotIndex = pathAfterUpload.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            pathAfterUpload = pathAfterUpload.substring(0, lastDotIndex);
+        }
+        return pathAfterUpload;
     }
 }
