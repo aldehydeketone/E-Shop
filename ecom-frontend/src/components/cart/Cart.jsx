@@ -26,21 +26,21 @@ const Cart = () => {
                 <p className="text-lg text-gray-600 mt-2">All your selected items</p>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-900/70">
-            <div className="hidden items-center gap-4 border-b border-slate-700 bg-slate-800/70 px-5 py-4 font-semibold md:grid md:grid-cols-5">
-                <div className="md:col-span-2 justify-self-start text-lg text-slate-800 lg:ps-4">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md">
+            <div className="hidden items-center gap-4 border-b border-gray-200 bg-gray-50 px-5 py-4 font-semibold md:grid md:grid-cols-5">
+                <div className="md:col-span-2 justify-self-start text-lg text-gray-700 lg:ps-4">
                     Product
                 </div>
 
-                <div className="justify-self-center text-lg text-slate-800">
+                <div className="justify-self-center text-lg text-gray-700">
                     Price
                 </div>
 
-                <div className="justify-self-center text-lg text-slate-800">
+                <div className="justify-self-center text-lg text-gray-700">
                     Quantity
                 </div>
 
-                <div className="justify-self-center text-lg text-slate-800">
+                <div className="justify-self-center text-lg text-gray-700">
                     Total
                 </div>
             </div>
@@ -52,13 +52,13 @@ const Cart = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-                <div className="flex w-full max-w-md flex-col gap-1 rounded-xl border border-slate-700 bg-slate-900/70 p-5 text-sm">
-                    <div className="flex justify-between w-full md:text-lg text-sm font-semibold">
+                <div className="flex w-full max-w-md flex-col gap-1 rounded-xl border border-gray-200 bg-white shadow-md p-5 text-sm">
+                    <div className="flex justify-between w-full md:text-lg text-sm font-semibold text-gray-900">
                         <span>Subtotal</span>
                         <span>{formatPrice(newCart?.totalPrice)}</span>
                     </div>
 
-                    <p className="text-slate-500">
+                    <p className="text-gray-500">
                         Taxes and shipping calculated at checkout
                     </p>
 
@@ -71,7 +71,7 @@ const Cart = () => {
                     </button>
                     </Link>
 
-                    <Link className="mt-3 flex items-center justify-center gap-2 text-slate-400 transition-colors hover:text-white" to="/products">
+                    <Link className="mt-3 flex items-center justify-center gap-2 text-gray-600 transition-colors hover:text-gray-900" to="/products">
                         <MdArrowBack />
                         <span>Continue Shopping</span>
                     </Link>

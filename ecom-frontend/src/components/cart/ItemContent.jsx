@@ -43,7 +43,7 @@ const ItemContent = ({
     };
     
     return (
-        <div className="grid grid-cols-2 items-center gap-4 border-b border-slate-700 p-4 text-sm last:border-b-0 md:grid-cols-5 md:px-5 md:py-4">
+        <div className="grid grid-cols-2 items-center gap-4 border-b border-gray-200 p-4 text-sm last:border-b-0 md:grid-cols-5 md:px-5 md:py-4">
             <div className="col-span-2 flex min-w-0 items-center gap-4 md:col-span-2">
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-white p-2 sm:h-28 sm:w-28">
                     <img 
@@ -52,7 +52,7 @@ const ItemContent = ({
                         className="h-full w-full object-contain"/>
                 </div>
                 <div className="min-w-0">
-                   <h3 className="text-base font-semibold text-slate-100 sm:text-[17px]">
+                   <h3 className="text-base font-semibold text-gray-900 sm:text-[17px]">
                     {truncateText(productName)}
                    </h3>
                 <div className="mt-3">
@@ -74,13 +74,13 @@ const ItemContent = ({
                 </div>
             </div>
 
-            <div className="justify-self-center flex flex-col items-center gap-1 text-base font-semibold text-slate-100">
-                <span className="md:hidden text-xs font-medium text-slate-400">Price</span>
+            <div className="justify-self-center flex flex-col items-center gap-1 text-base font-semibold text-gray-900">
+                <span className="md:hidden text-xs font-medium text-gray-500">Price</span>
                 {formatPrice(Number(specialPrice))}
             </div>
 
             <div className="justify-self-center flex flex-col items-center gap-1">
-                <span className="md:hidden text-xs font-medium text-slate-400">Quantity</span>
+                <span className="md:hidden text-xs font-medium text-gray-500">Quantity</span>
                 <SetQuantity 
                     quantity={quantity}
                     cardCounter={true}
@@ -89,8 +89,8 @@ const ItemContent = ({
                     handleQtyDecrease={handleQtyDecrease}/>
             </div>
 
-            <div className="col-span-2 flex items-center gap-2 justify-self-end text-base font-bold text-white md:col-span-1 md:justify-self-center">
-                <span className="md:hidden text-xs font-medium text-slate-400">Total</span>
+            <div className="col-span-2 flex items-center gap-2 justify-self-end text-base font-bold text-gray-900 md:col-span-1 md:justify-self-center">
+                <span className="md:hidden text-xs font-medium text-gray-500">Total</span>
                 {formatPrice(Number(quantity) * Number(specialPrice))}
             </div>
         </div>
