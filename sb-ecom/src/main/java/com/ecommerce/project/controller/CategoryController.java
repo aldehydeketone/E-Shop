@@ -46,4 +46,17 @@ public class CategoryController {
             CategoryDTO savedCategoryDTO = categoryService.updateCategory(categoryDTO, categoryId);
             return new ResponseEntity<>(savedCategoryDTO, HttpStatus.OK);
     }
+
+    @GetMapping("/public/version")
+    public ResponseEntity<String> getVersion() {
+        try {
+            java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("git.properties");
+            if (is != null) {
+                java.util.Properties props = new java.util.Properties();
+                props.load(is);
+                return new ResponseEntity<>(props.getProperty("git.commit.id.abbrev", "unknown"), HttpStatus.OK);
+            }
+        } catch (Exception e) {}
+        return new ResponseEntity<>("unknown", HttpStatus.OK);
+    }
 }
