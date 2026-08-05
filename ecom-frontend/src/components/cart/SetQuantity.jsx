@@ -1,5 +1,5 @@
 
-const btnStyles = "flex h-10 w-10 items-center justify-center rounded-md border border-slate-500 text-lg font-medium text-slate-100 transition-colors hover:border-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40";
+const btnStyles = "flex h-10 w-10 items-center justify-center rounded-md border border-gray-300 text-lg font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40";
 const SetQuantity = ({
     quantity,
     cardCounter,
@@ -17,7 +17,7 @@ const SetQuantity = ({
                 onClick={handleQtyDecrease}>
                 -
             </button>
-                <div className="min-w-5 text-center font-semibold text-white">{quantity}</div>
+                <div className="min-w-5 text-center font-semibold text-gray-900">{quantity}</div>
             <button
                 disabled={disabled}
                 className={btnStyles}
