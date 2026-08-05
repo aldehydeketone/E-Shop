@@ -13,7 +13,11 @@ import { Autoplay, Pagination, EffectFade, Navigation } from 'swiper/modules';
 import { bannerLists } from '../../utils';
 import { Link } from 'react-router-dom';
 
-const colors = ["bg-banner-color1", "bg-banner-color2", "bg-banner-color3"];
+const colors = [
+    "bg-linear-to-br from-banner-color1 via-amber-400 to-orange-500",
+    "bg-linear-to-br from-banner-color2 via-red-500 to-rose-700",
+    "bg-linear-to-br from-banner-color3 via-emerald-500 to-teal-700",
+];
 
 const HeroBanner = () => {
     return (
