@@ -48,7 +48,7 @@ const ProductCard = ({
                     specialPrice,
                 })
             }} 
-                    className="w-full overflow-hidden border-b border-slate-700 bg-white aspect-4/3">
+                    className="w-full overflow-hidden border-b border-slate-700 bg-white aspect-[4/3] flex items-center justify-center">
                 <img 
                 className="h-full w-full cursor-pointer object-contain p-5 transition-transform duration-300 group-hover:scale-[1.03]"
                 src={image}

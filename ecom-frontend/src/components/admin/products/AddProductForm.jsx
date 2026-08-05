@@ -52,6 +52,11 @@ const dispatch = useDispatch();
 
     const saveProductHandler = async (data) => {
         if (!update) {
+            if (!selectedCategory || !selectedCategory.categoryId) {
+                toast.error("Please select a category");
+                return;
+            }
+
             // ── CREATE ──────────────────────────────────────────────────────────
             const sendData = {
                 ...data,
@@ -127,16 +132,16 @@ const dispatch = useDispatch();
     }, [dispatch, update]);
 
     useEffect(() => {
-        if (!categoryLoader && categories) {
-            setSelectedCategory(categories[0]);
+        if (!categoryLoader && categories && !selectedCategory) {
+            setSelectedCategory({ categoryId: "", categoryName: "Select Category" });
         }
-    }, [categories, categoryLoader]);
+    }, [categories, categoryLoader, selectedCategory]);
 
     if (categoryLoader) return <Skeleton />
     if (errorMessage) return <ErrorPage message={errorMessage} />
 
   return (
-    <div className='py-5 relative h-full'>
+    <div className='py-5'>
         <form className='space-y-4'
             onSubmit={handleSubmit(saveProductHandler)}>
             <div className='flex md:flex-row flex-col gap-4 w-full'>
@@ -270,7 +275,7 @@ const dispatch = useDispatch();
             </div>
         )}
 
-        <div className='flex w-full justify-between items-center absolute bottom-14'>
+        <div className='sticky bottom-0 z-10 mt-8 flex w-full items-center justify-between border-t bg-white py-4'>
             <Button disabled={loader}
                     onClick={() => setOpen(false)}
                     variant='outlined'
