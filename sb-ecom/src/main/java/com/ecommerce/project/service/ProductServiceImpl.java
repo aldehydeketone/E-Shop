@@ -61,39 +61,104 @@ public class ProductServiceImpl implements ProductService {
     @Value("${image.base.url}")
     private String imageBaseUrl;
 
+    // Git commit info — baked into git.properties by git-commit-id-maven-plugin at Docker build time
+    @Value("${git.commit.id.abbrev:UNKNOWN-abbrev}")
+    private String gitCommitShort;
+
+    @Value("${git.commit.id:UNKNOWN-full}")
+    private String gitCommitFull;
+
+    @Value("${git.branch:UNKNOWN-branch}")
+    private String gitBranch;
+
+    @Value("${git.commit.message.short:UNKNOWN-msg}")
+    private String gitCommitMessage;
+
     @Override
     @Transactional
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
         try {
-            log.info("ADD_PRODUCT STEP 1 - Method entered");
+            log.info("ADD_PRODUCT STEP 1 - Method entered. categoryId={}, productName={}",
+                    categoryId, productDTO.getProductName());
+            log.info("ADD_PRODUCT STEP 1 - RUNNING COMMIT: branch={} commit={} (full={}) msg=[{}]",
+                    gitBranch, gitCommitShort, gitCommitFull, gitCommitMessage);
+
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() ->
                             new ResourceNotFoundException("Category", "categoryId", categoryId));
-            log.info("ADD_PRODUCT STEP 2 - Category loaded");
+            log.info("ADD_PRODUCT STEP 2 - Category loaded. categoryName={}", category.getCategoryName());
+
             boolean exists = productRepository.existsByCategoryAndProductName(category, productDTO.getProductName());
-            log.info("ADD_PRODUCT STEP 3 - Duplicate check complete");
+            log.info("ADD_PRODUCT STEP 3 - Duplicate check complete. exists={}", exists);
             if (exists) {
                 throw new APIException("Product already exist!!");
             }
+
             Product product = modelMapper.map(productDTO, Product.class);
-            log.info("ADD_PRODUCT STEP 4 - DTO mapped");
+            log.info("ADD_PRODUCT STEP 4 - DTO mapped to Product. productId(pre-save)={}", product.getProductId());
+
             product.setImage("default.png");
-            log.info("ADD_PRODUCT STEP 5 - Image assigned");
+            log.info("ADD_PRODUCT STEP 5 - Image set to default.png");
+
             product.setCategory(category);
-            log.info("ADD_PRODUCT STEP 6 - Category assigned");
-            product.setUser(authUtil.loggedInUser());
-            log.info("ADD_PRODUCT STEP 7 - User assigned");
+            log.info("ADD_PRODUCT STEP 6 - Category assigned to product");
+
+            User loggedInUser = authUtil.loggedInUser();
+            product.setUser(loggedInUser);
+            log.info("ADD_PRODUCT STEP 7 - User assigned. userId={}, username={}",
+                    loggedInUser != null ? loggedInUser.getUserId() : "NULL",
+                    loggedInUser != null ? loggedInUser.getUserName() : "NULL");
+
             double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
             product.setSpecialPrice(specialPrice);
-            log.info("ADD_PRODUCT STEP 8 - Special price calculated");
-            Product savedProduct = productRepository.save(product);
-            log.info("ADD_PRODUCT STEP 9 - Product saved");
-            ProductDTO response = toProductDTO(savedProduct);
-            log.info("ADD_PRODUCT STEP 10 - DTO created");
-            log.info("ADD_PRODUCT STEP 11 - Returning response");
+            log.info("ADD_PRODUCT STEP 8 - Special price calculated. price={}, discount={}, specialPrice={}",
+                    product.getPrice(), product.getDiscount(), specialPrice);
+
+            log.info("ADD_PRODUCT STEP 9a - BEFORE productRepository.save()");
+            Product savedProduct;
+            try {
+                savedProduct = productRepository.save(product);
+                log.info("ADD_PRODUCT STEP 9b - AFTER productRepository.save(). savedProductId={}", savedProduct.getProductId());
+            } catch (Exception saveEx) {
+                Throwable rootCause = saveEx;
+                while (rootCause.getCause() != null) rootCause = rootCause.getCause();
+                log.error("ADD_PRODUCT STEP 9 FAILED - productRepository.save() threw exception");
+                log.error("  Exception class  : {}", saveEx.getClass().getName());
+                log.error("  Exception message: {}", saveEx.getMessage());
+                log.error("  Root cause class : {}", rootCause.getClass().getName());
+                log.error("  Root cause msg   : {}", rootCause.getMessage());
+                log.error("  Full stack trace :", saveEx);
+                throw saveEx;
+            }
+
+            log.info("ADD_PRODUCT STEP 10 - BEFORE toProductDTO(). savedProductId={}", savedProduct.getProductId());
+            ProductDTO response;
+            try {
+                response = toProductDTO(savedProduct);
+                log.info("ADD_PRODUCT STEP 11 - toProductDTO() complete. Returning response. productId={}", response.getProductId());
+            } catch (Exception dtoEx) {
+                Throwable rootCause = dtoEx;
+                while (rootCause.getCause() != null) rootCause = rootCause.getCause();
+                log.error("ADD_PRODUCT STEP 10 FAILED - toProductDTO() threw exception");
+                log.error("  Exception class  : {}", dtoEx.getClass().getName());
+                log.error("  Exception message: {}", dtoEx.getMessage());
+                log.error("  Root cause class : {}", rootCause.getClass().getName());
+                log.error("  Root cause msg   : {}", rootCause.getMessage());
+                log.error("  Full stack trace :", dtoEx);
+                throw dtoEx;
+            }
+
             return response;
+
         } catch (Exception e) {
-            log.error("ADD_PRODUCT FAILED", e);
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null) rootCause = rootCause.getCause();
+            log.error("ADD_PRODUCT OUTER CATCH - Unhandled exception escaping addProduct()");
+            log.error("  Exception class  : {}", e.getClass().getName());
+            log.error("  Exception message: {}", e.getMessage());
+            log.error("  Root cause class : {}", rootCause.getClass().getName());
+            log.error("  Root cause msg   : {}", rootCause.getMessage());
+            log.error("  Full stack trace :", e);
             throw e;
         }
     }

@@ -28,9 +28,9 @@ const SellerTable = ({ sellers, pagination }) => {
 
   return (
     <div>
-      <div className="max-w-fit mx-auto">
+      <div className="w-full overflow-x-auto">
         <DataGrid
-          className="w-full"
+          className="min-w-[1200px]"
           rows={tableRecords}
           paginationMode="server"
           rowCount={pagination?.totalElements || 0}

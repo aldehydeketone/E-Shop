@@ -72,43 +72,27 @@ export const addToCart = (data, qty = 1, toast) =>
 };
 
 
-export const increaseCartQuantity = 
-    (data, toast, currentQuantity, setCurrentQuantity) =>
-    (dispatch, getState) => {
-        // Find the product
-        const { products } = getState().products;
-        
-        const getProduct = products.find(
-            (item) => item.productId === data.productId
-        );
-
-        const isQuantityExist = getProduct.quantity >= currentQuantity + 1;
-
-        if (isQuantityExist) {
-            const newQuantity = currentQuantity + 1;
-            setCurrentQuantity(newQuantity);
-
-            dispatch({
-                type: "ADD_CART",
-                payload: {...data, quantity: newQuantity + 1 },
-            });
-            localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
-        } else {
-            toast.error("Quantity Reached to Limit");
-        }
-
-    };
-
-
-
-export const decreaseCartQuantity = 
-    (data, newQuantity) => (dispatch, getState) => {
-        dispatch({
-            type: "ADD_CART",
-            payload: {...data, quantity: newQuantity},
-        });
-        localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
+export const increaseCartQuantity = (productId, toast) => async (dispatch) => {
+    try {
+        await api.put(`/cart/products/${productId}/quantity/add`);
+        await dispatch(getUserCart());
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Unable to update cart quantity");
     }
+};
+
+
+
+export const decreaseCartQuantity = (productId, toast) => async (dispatch) => {
+    try {
+        await api.put(`/cart/products/${productId}/quantity/delete`);
+        await dispatch(getUserCart());
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Unable to update cart quantity");
+    }
+};
 
 export const removeFromCart =  (data, toast) => (dispatch, getState) => {
     dispatch({type: "REMOVE_CART", payload: data });

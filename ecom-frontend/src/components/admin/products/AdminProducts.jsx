@@ -120,9 +120,9 @@ const onDeleteHandler = () => {
           </h2>
         </div>
       ) : (
-        <div className='max-w-full'>
+        <div className='w-full overflow-x-auto'>
           <DataGrid
-            className='w-full'
+            className='min-w-[1860px]'
             rows={tableRecords}
             columns={adminProductTableColumn(
               handleEdit,

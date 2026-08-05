@@ -40,7 +40,7 @@ const AddCategoryForm = ({ setOpen, open, category, update = false }) => {
   }, [update, category]);
 
   return (
-    <div className="py-5 relative h-full ">
+    <div className="py-5">
       <form
         className="space-y-4 "
         onSubmit={handleSubmit(addNewCategoryHandler)}
@@ -58,7 +58,7 @@ const AddCategoryForm = ({ setOpen, open, category, update = false }) => {
           />
         </div>
 
-        <div className="flex  w-full justify-between items-center absolute bottom-14">
+        <div className="sticky bottom-0 z-10 mt-8 flex w-full items-center justify-between border-t bg-white py-4">
           <button
             disabled={open}
             onClick={() => setOpen(false)}

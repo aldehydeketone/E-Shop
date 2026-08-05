@@ -39,7 +39,7 @@ const UpdateOrderForm = ({ setOpen, selectedId, selectedItem, loader, setLoader}
     };
 
   return (
-    <div className='py-5 relative h-full'>
+    <div className='py-5'>
         <form className='space-y-4' onSubmit={updateOrderStatus}>
             <FormControl fullWidth variant='outlined' error={!!error}>
                 <InputLabel id="order-status-label">Order Status</InputLabel>
@@ -65,7 +65,7 @@ const UpdateOrderForm = ({ setOpen, selectedId, selectedItem, loader, setLoader}
                 {error && <FormHelperText>{error}</FormHelperText>}
             </FormControl>
 
-            <div className='flex w-full justify-between items-center absolute bottom-14'>
+            <div className='sticky bottom-0 z-10 mt-8 flex w-full items-center justify-between border-t bg-white py-4'>
                 <Button disabled={loader}
                         onClick={() => setOpen(false)}
                         variant='outlined'

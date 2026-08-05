@@ -9,6 +9,7 @@ import com.ecommerce.project.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,12 +25,12 @@ public class AddressServiceImpl implements AddressService{
     UserRepository userRepository;
 
     @Override
+    @Transactional
     public AddressDTO createAddress(AddressDTO addressDTO, User user) {
+        User dbUser = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", user.getUserId()));
         Address address = modelMapper.map(addressDTO, Address.class);
-        address.setUser(user);
-        List<Address> addressesList = user.getAddresses();
-        addressesList.add(address);
-        user.setAddresses(addressesList);
+        address.setUser(dbUser);
         Address savedAddress = addressRepository.save(address);
         return modelMapper.map(savedAddress, AddressDTO.class);
     }
@@ -51,7 +52,9 @@ public class AddressServiceImpl implements AddressService{
 
     @Override
     public List<AddressDTO> getUserAddresses(User user) {
-        List<Address> addresses = user.getAddresses();
+        User dbUser = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", user.getUserId()));
+        List<Address> addresses = addressRepository.findByUser(dbUser);
         return addresses.stream()
                 .map(address -> modelMapper.map(address, AddressDTO.class))
                 .toList();
@@ -71,11 +74,6 @@ public class AddressServiceImpl implements AddressService{
 
         Address updatedAddress = addressRepository.save(addressFromDatabase);
 
-        User user = addressFromDatabase.getUser();
-        user.getAddresses().removeIf(address -> address.getAddressId().equals(addressId));
-        user.getAddresses().add(updatedAddress);
-        userRepository.save(user);
-
         return modelMapper.map(updatedAddress, AddressDTO.class);
     }
 
@@ -83,10 +81,6 @@ public class AddressServiceImpl implements AddressService{
     public String deleteAddress(Long addressId) {
         Address addressFromDatabase = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
-
-        User user = addressFromDatabase.getUser();
-        user.getAddresses().removeIf(address -> address.getAddressId().equals(addressId));
-        userRepository.save(user);
 
         addressRepository.delete(addressFromDatabase);
 

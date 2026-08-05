@@ -1,23 +1,25 @@
 
-const btnStyles = "border-[1.2px] border-slate-800 px-3 py-1 rounded-sm";
+const btnStyles = "flex h-10 w-10 items-center justify-center rounded-md border border-slate-500 text-lg font-medium text-slate-100 transition-colors hover:border-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40";
 const SetQuantity = ({
     quantity,
     cardCounter,
     handeQtyIncrease,
     handleQtyDecrease,
+    disabled = false,
 }) => {
    return (
-   <div className="flex gap-8 items-center">
+   <div className="flex items-center">
         {cardCounter ? null : <div className="font-semibold">QUANTITY</div>}
-        <div className="flex md:flex-row flex-col gap-4 items-center lg:text-[22px] text-sm">
+        <div className="flex flex-row items-center gap-3 text-base">
             <button
-                disabled={quantity<=1}
+                disabled={disabled || quantity<=1}
                 className={btnStyles}
                 onClick={handleQtyDecrease}>
                 -
             </button>
-                <div className="text-red-500">{quantity}</div>
+                <div className="min-w-5 text-center font-semibold text-white">{quantity}</div>
             <button
+                disabled={disabled}
                 className={btnStyles}
                 onClick={handeQtyIncrease}>
                 +

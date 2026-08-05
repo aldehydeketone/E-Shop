@@ -53,7 +53,7 @@ const ImageUploadForm = ({ setOpen, product }) => {
     };
 
   return (
-    <div className='py-5 relative h-full'>
+    <div className='py-5'>
         <form className='space-y-4' onSubmit={addNewImageHandler}>
             <div className='flex flex-col gap-4 w-full'>
                 <label className='flex items-center gap-2 cursor-pointer text-custom-blue border border-dashed border-custom-blue rounded-md p-3 w-full justify-center'>
@@ -82,7 +82,7 @@ const ImageUploadForm = ({ setOpen, product }) => {
                 )}
             </div>
 
-            <div className='flex w-full justify-between items-center absolute bottom-14'>
+            <div className='sticky bottom-0 z-10 mt-8 flex w-full items-center justify-between border-t bg-white py-4'>
             <Button disabled={loader}
                     onClick={() => setOpen(false)}
                     variant='outlined'

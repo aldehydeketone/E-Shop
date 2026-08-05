@@ -98,9 +98,9 @@ const Category = () => {
               </h2>
             </div>
           ) : (
-            <div className="max-w-fit mx-auto">
+            <div className="w-full overflow-x-auto">
               <DataGrid
-                className="w-full"
+                className="min-w-[1100px]"
                 rows={tableRecords}
                 columns={categoryTableColumns(handleEdit, handleDelete)}
                 paginationMode="server"

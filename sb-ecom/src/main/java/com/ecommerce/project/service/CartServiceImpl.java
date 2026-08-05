@@ -39,6 +39,7 @@ public class CartServiceImpl implements CartService{
     ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public CartDTO addProductToCart(Long productId, Integer quantity) {
         Cart cart  = createCart();
 
@@ -119,6 +120,7 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
+    @Transactional
     public CartDTO getCart(String emailId, Long cartId) {
         Cart cart = cartRepository.findCartByEmailAndCartId(emailId, cartId);
         if (cart == null){
@@ -138,8 +140,7 @@ public class CartServiceImpl implements CartService{
     @Override
     public CartDTO updateProductQuantityInCart(Long productId, Integer quantity) {
 
-        String emailId = authUtil.loggedInEmail();
-        Cart userCart = cartRepository.findCartByEmail(emailId);
+        Cart userCart = createCart();
         Long cartId  = userCart.getCartId();
 
         Cart cart = cartRepository.findById(cartId)

@@ -46,9 +46,9 @@ const handleEdit = (order) => {
         All Orders
       </h1>
 
-      <div>
+      <div className='w-full overflow-x-auto'>
          <DataGrid
-         className='w-full'
+         className='min-w-[1280px]'
             rows={tableRecords}
             columns={adminOrderTableColumn(handleEdit)}
             paginationMode='server'
