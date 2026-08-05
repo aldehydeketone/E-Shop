@@ -47,4 +47,14 @@ public class MyGlobalExceptionHandler {
         APIResponse apiResponse = new APIResponse("Invalid username or password", false);
         return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<APIResponse> myConstraintViolationException(jakarta.validation.ConstraintViolationException e) {
+        StringBuilder errorMessage = new StringBuilder();
+        e.getConstraintViolations().forEach(err -> {
+            errorMessage.append(err.getMessage()).append("; ");
+        });
+        APIResponse apiResponse = new APIResponse(errorMessage.toString(), false);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
 }
