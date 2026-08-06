@@ -5,6 +5,8 @@ import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.payload.ProductResponse;
 import com.ecommerce.project.service.ProductService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api")
 public class ProductController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
     @Autowired
     ProductService productService;
@@ -83,8 +87,13 @@ public class ProductController {
     @PutMapping("/admin/products/{productId}/image")
     public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
                                                          @RequestParam("image")MultipartFile image) throws IOException {
-        System.out.println("HIT /admin/products/" + productId + "/image endpoint. File size: " + image.getSize());
+        log.info("[CONTROLLER] ===== HIT PUT /admin/products/{}/image =====", productId);
+        log.info("[CONTROLLER] File name: {}", image != null ? image.getOriginalFilename() : "NULL");
+        log.info("[CONTROLLER] File size: {} bytes", image != null ? image.getSize() : -1);
+        log.info("[CONTROLLER] File empty: {}", image == null || image.isEmpty());
+        log.info("[CONTROLLER] Content-Type: {}", image != null ? image.getContentType() : "NULL");
         ProductDTO updatedProduct = productService.updateProductImage(productId, image);
+        log.info("[CONTROLLER] ===== DONE PUT /admin/products/{}/image =====", productId);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 
@@ -128,8 +137,13 @@ public class ProductController {
     @PutMapping("/seller/products/{productId}/image")
     public ResponseEntity<ProductDTO> updateProductImageSeller(@PathVariable Long productId,
                                                          @RequestParam("image")MultipartFile image) throws IOException {
-        System.out.println("HIT /seller/products/" + productId + "/image endpoint. File size: " + image.getSize());
+        log.info("[CONTROLLER] ===== HIT PUT /seller/products/{}/image =====", productId);
+        log.info("[CONTROLLER] File name: {}", image != null ? image.getOriginalFilename() : "NULL");
+        log.info("[CONTROLLER] File size: {} bytes", image != null ? image.getSize() : -1);
+        log.info("[CONTROLLER] File empty: {}", image == null || image.isEmpty());
+        log.info("[CONTROLLER] Content-Type: {}", image != null ? image.getContentType() : "NULL");
         ProductDTO updatedProduct = productService.updateProductImage(productId, image);
+        log.info("[CONTROLLER] ===== DONE PUT /seller/products/{}/image =====", productId);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
 }

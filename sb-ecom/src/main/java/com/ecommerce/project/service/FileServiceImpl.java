@@ -21,22 +21,35 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String uploadImage(MultipartFile file) throws IOException {
+        log.info("[FILESERVICE] ===== uploadImage(MultipartFile) ENTERED =====");
+        log.info("[FILESERVICE] file null? {}", file == null);
+        if (file != null) {
+            log.info("[FILESERVICE] file.isEmpty()={}, name={}, size={} bytes, contentType={}",
+                file.isEmpty(), file.getOriginalFilename(), file.getSize(), file.getContentType());
+        }
+
         if (file == null || file.isEmpty()) {
+            log.error("[FILESERVICE] File is null or empty — throwing IOException");
             throw new IOException("Cannot upload an empty file");
         }
 
         log.info("[CLOUDINARY] Uploading file '{}' (size: {} bytes) to Cloudinary...",
                 file.getOriginalFilename(), file.getSize());
 
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        byte[] fileBytes = file.getBytes();
+        log.info("[FILESERVICE] Got file bytes, length={}", fileBytes.length);
+
+        Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.emptyMap());
         String secureUrl = (String) uploadResult.get("secure_url");
 
         log.info("[CLOUDINARY] Successfully uploaded. Secure URL: {}", secureUrl);
+        log.info("[FILESERVICE] ===== uploadImage(MultipartFile) RETURNING =====");
         return secureUrl;
     }
 
     @Override
     public String uploadImage(String path, MultipartFile file) throws IOException {
+        log.info("[FILESERVICE] uploadImage(path, file) called — path='{}', delegating to uploadImage(file)", path);
         return uploadImage(file);
     }
 

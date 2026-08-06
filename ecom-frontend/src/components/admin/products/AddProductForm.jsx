@@ -70,30 +70,61 @@ const dispatch = useDispatch();
             try {
                 setLoader(true);
                 const endpoint = isAdmin ? "/admin/categories/" : "/seller/categories/";
+
+                // ── STEP A: Before POST ──────────────────────────────────────
+                console.log("=== [STEP A] BEFORE POST ===");
+                console.log("  endpoint:", `${endpoint}${sendData.categoryId}/product`);
+                console.log("  sendData:", JSON.stringify(sendData));
+                console.log("  selectedFile at POST time:", selectedFile ? `${selectedFile.name} (${selectedFile.size} bytes, ${selectedFile.type})` : "NULL");
+                console.log("  isAdmin:", isAdmin);
+
                 const { data: created } = await api.post(
                     `${endpoint}${sendData.categoryId}/product`,
                     sendData
                 );
 
-                // Upload image immediately after product is created
-                console.log("Product created:", created);
-                console.log("Selected file:", selectedFile);
+                // ── STEP B: After POST ───────────────────────────────────────
+                console.log("=== [STEP B] AFTER POST - full created object ===");
+                console.log("  created (raw):", created);
+                console.log("  created.productId:", created?.productId);
+                console.log("  selectedFile after POST:", selectedFile ? `${selectedFile.name} (${selectedFile.size} bytes)` : "NULL");
+
                 if (selectedFile && created?.productId) {
-                    console.log("Attempting to upload image for productId:", created.productId);
+                    const imgEndpoint = isAdmin ? "/admin/products/" : "/seller/products/";
+                    const putUrl = `${imgEndpoint}${created.productId}/image`;
+
+                    // ── STEP C: Before PUT ───────────────────────────────────
+                    console.log("=== [STEP C] BEFORE PUT ===");
+                    console.log("  PUT URL:", putUrl);
+                    console.log("  productId:", created.productId);
+                    console.log("  file name:", selectedFile.name);
+                    console.log("  file size:", selectedFile.size, "bytes");
+                    console.log("  file type:", selectedFile.type);
+
                     const formData = new FormData();
                     formData.append("image", selectedFile);
-                    const imgEndpoint = isAdmin ? "/admin/products/" : "/seller/products/";
-                    console.log("Image endpoint:", `${imgEndpoint}${created.productId}/image`);
+
                     try {
-                        const res = await api.put(`${imgEndpoint}${created.productId}/image`, formData);
-                        console.log("Image upload response:", res);
+                        console.log("=== [STEP D] PUT REQUEST SENT ===");
+                        const res = await api.put(putUrl, formData);
+                        console.log("=== [STEP E] PUT SUCCESS ===");
+                        console.log("  response status:", res?.status);
+                        console.log("  response data:", res?.data);
                     } catch (imgErr) {
-                        console.error("Image upload error:", imgErr);
-                        // Non-fatal: product exists, image just didn't upload
-                        toast.error("Product created but image upload failed. You can upload it from the product list.");
+                        console.error("=== [STEP E] PUT FAILED ===");
+                        console.error("  HTTP status:", imgErr?.response?.status);
+                        console.error("  response data:", imgErr?.response?.data);
+                        console.error("  full error:", imgErr);
+                        toast.error(
+                            imgErr?.response?.data?.message ||
+                            imgErr?.response?.data?.description ||
+                            `Image upload failed (status ${imgErr?.response?.status})`
+                        );
                     }
                 } else {
-                    console.log("Skipping image upload. selectedFile:", !!selectedFile, "productId:", created?.productId);
+                    console.warn("=== [SKIP] Image upload skipped ===");
+                    console.warn("  selectedFile:", selectedFile ? `${selectedFile.name}` : "NULL / falsy");
+                    console.warn("  created.productId:", created?.productId);
                 }
 
                 toast.success("Product created successfully");
@@ -101,7 +132,7 @@ const dispatch = useDispatch();
                 setOpen(false);
                 await dispatch(dashboardProductsAction());
             } catch (error) {
-                console.error(error);
+                console.error("=== [ERROR] Product POST failed ===", error?.response?.data, error);
                 toast.error(error?.response?.data?.message || "Product creation failed");
             } finally {
                 setLoader(false);

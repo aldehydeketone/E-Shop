@@ -384,19 +384,30 @@
             @Override
             @Transactional
             public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {
+                log.info("[SERVICE] ===== updateProductImage ENTERED. productId={} =====", productId);
+                log.info("[SERVICE] image param null? {}", image == null);
+                if (image != null) {
+                    log.info("[SERVICE] image.isEmpty()={}, name={}, size={} bytes, contentType={}",
+                        image.isEmpty(), image.getOriginalFilename(), image.getSize(), image.getContentType());
+                }
+
                 Product productFromDb = productRepository.findById(productId)
                         .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+                log.info("[SERVICE] Product found in DB: id={}, name={}, currentImage={}",
+                    productFromDb.getProductId(), productFromDb.getProductName(), productFromDb.getImage());
 
                 if (productFromDb.getImage() != null && productFromDb.getImage().contains("cloudinary.com")) {
+                    log.info("[SERVICE] Existing Cloudinary image detected — deleting: {}", productFromDb.getImage());
                     fileService.deleteImage(productFromDb.getImage());
                 }
 
-                log.info("[IMAGE UPLOAD SERVICE] Before calling fileService.uploadImage for productId: {}", productId);
+                log.info("[SERVICE] ===== CALLING fileService.uploadImage =====");
                 String secureUrl = fileService.uploadImage(path, image);
-                log.info("[IMAGE UPLOAD SERVICE] After calling fileService.uploadImage. Returned secureUrl: {}", secureUrl);
-                productFromDb.setImage(secureUrl);
+                log.info("[SERVICE] ===== fileService.uploadImage RETURNED: {} =====", secureUrl);
 
+                productFromDb.setImage(secureUrl);
                 Product updatedProduct = productRepository.save(productFromDb);
+                log.info("[SERVICE] Product saved with new image URL. id={}", updatedProduct.getProductId());
                 return toProductDTO(updatedProduct);
             }
 

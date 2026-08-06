@@ -1,0 +1,9 @@
+[33mcommit 5c7a400812c87c9a588ad7debca09eeec92baa0f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Mihir Singh <mihir304singh@gmail.com>
+Date:   Wed Aug 5 20:26:22 2026 +0530
+
+    fix: replace all modelMapper Product→DTO mappings with toProductDTO() to prevent LazyInitializationException on Category.products outside Hibernate session
+
+ .../project/service/ProductServiceImpl.java        | 28 [32m+++++++[m[31m---------------[m
+ sb-ecom/src/main/resources/application.properties  |  8 [32m+++++[m[31m--[m
+ 2 files changed, 14 insertions(+), 22 deletions(-)
