@@ -1,5 +1,8 @@
 FROM eclipse-temurin:21-jdk AS build
 
+# Cache-bust: 2026-08-06 force rebuild
+LABEL build.timestamp="2026-08-06T07:10:00Z"
+
 WORKDIR /workspace
 
 COPY .mvn/ .mvn/
@@ -21,4 +24,3 @@ EXPOSE 8080
 # Keep PostgreSQL as the only supported JDBC driver even if a stale Render
 # environment variable still sets SPRING_DATASOURCE_DRIVER_CLASS_NAME.
 ENTRYPOINT ["java","-Dspring.datasource.driver-class-name=org.postgresql.Driver","-jar","app.jar"]
-
