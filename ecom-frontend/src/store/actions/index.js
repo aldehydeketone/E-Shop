@@ -451,14 +451,17 @@ export const updateProductImageFromDashboard =
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
-        await api.put(`${endpoint}${productId}/image`, formData);
+        console.log("[IMG UPLOAD] Sending PUT to:", `${endpoint}${productId}/image`);
+        const response = await api.put(`${endpoint}${productId}/image`, formData);
+        console.log("[IMG UPLOAD] Success response:", response?.data);
         toast.success("Image upload successful");
         setLoader(false);
         setOpen(false);
         await dispatch(dashboardProductsAction());
     } catch (error) {
-        toast.error(error?.response?.data?.description || "Product Image upload failed");
-     
+        console.error("[IMG UPLOAD] Error:", error?.response?.status, error?.response?.data, error?.message);
+        toast.error(error?.response?.data?.message || error?.response?.data?.description || "Product Image upload failed");
+        setLoader(false);
     }
 };
 
