@@ -50,23 +50,40 @@ export const fetchCategories = () => async (dispatch) => {
 
 
 export const addToCart = (data, qty = 1, toast) => 
-    (dispatch, getState) => {
-        // Find the product
+    async (dispatch, getState) => {
+        const { user } = getState().auth;
+
+        if (user) {
+            try {
+                // If logged in, add product to cart directly on the backend database
+                await api.post(`/carts/products/${data.productId}/quantity/${qty}`);
+                await dispatch(getUserCart());
+                toast.success(`${data?.productName} added to the cart`);
+            } catch (error) {
+                console.log(error);
+                toast.error(error?.response?.data?.message || "Failed to add product to cart");
+            }
+            return;
+        }
+
+        // If guest user, keep in local storage only
         const { products } = getState().products;
-        const getProduct = products.find(
+        const getProduct = products?.find(
             (item) => item.productId === data.productId
         );
 
-        // Check for stocks
+        if (!getProduct) {
+            toast.error("Product not found");
+            return;
+        }
+
         const isQuantityExist = getProduct.quantity >= qty;
 
-        // If in stock -> add
         if (isQuantityExist) {
             dispatch({ type: "ADD_CART", payload: {...data, quantity: qty}});
             toast.success(`${data?.productName} added to the cart`);
             localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
         } else {
-            // error
             toast.error("Out of stock");
         }
 };
@@ -109,6 +126,8 @@ export const authenticateSignInUser
             const { data } = await api.post("/auth/signin", sendData);
             dispatch({ type: "LOGIN_USER", payload: data });
             localStorage.setItem("auth", JSON.stringify(data));
+            // Sync/load backend cart upon login
+            await dispatch(getUserCart());
             reset();
             toast.success("Login Success");
             navigate("/");
