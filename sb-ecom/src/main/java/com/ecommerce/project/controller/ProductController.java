@@ -83,6 +83,7 @@ public class ProductController {
     @PutMapping("/admin/products/{productId}/image")
     public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
                                                          @RequestParam("image")MultipartFile image) throws IOException {
+        System.out.println("HIT /admin/products/" + productId + "/image endpoint. File size: " + image.getSize());
         ProductDTO updatedProduct = productService.updateProductImage(productId, image);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
@@ -127,6 +128,7 @@ public class ProductController {
     @PutMapping("/seller/products/{productId}/image")
     public ResponseEntity<ProductDTO> updateProductImageSeller(@PathVariable Long productId,
                                                          @RequestParam("image")MultipartFile image) throws IOException {
+        System.out.println("HIT /seller/products/" + productId + "/image endpoint. File size: " + image.getSize());
         ProductDTO updatedProduct = productService.updateProductImage(productId, image);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }

@@ -76,16 +76,24 @@ const dispatch = useDispatch();
                 );
 
                 // Upload image immediately after product is created
+                console.log("Product created:", created);
+                console.log("Selected file:", selectedFile);
                 if (selectedFile && created?.productId) {
+                    console.log("Attempting to upload image for productId:", created.productId);
                     const formData = new FormData();
                     formData.append("image", selectedFile);
                     const imgEndpoint = isAdmin ? "/admin/products/" : "/seller/products/";
+                    console.log("Image endpoint:", `${imgEndpoint}${created.productId}/image`);
                     try {
-                        await api.put(`${imgEndpoint}${created.productId}/image`, formData);
+                        const res = await api.put(`${imgEndpoint}${created.productId}/image`, formData);
+                        console.log("Image upload response:", res);
                     } catch (imgErr) {
+                        console.error("Image upload error:", imgErr);
                         // Non-fatal: product exists, image just didn't upload
                         toast.error("Product created but image upload failed. You can upload it from the product list.");
                     }
+                } else {
+                    console.log("Skipping image upload. selectedFile:", !!selectedFile, "productId:", created?.productId);
                 }
 
                 toast.success("Product created successfully");
